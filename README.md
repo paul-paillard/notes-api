@@ -1,10 +1,11 @@
 # notes-api
 
-API de notes en NestJS / TypeScript avec PostgreSQL, conteneurisée avec Docker,
-construite et déployée automatiquement sur AWS (Terraform, GitHub Actions).
+A notes REST API built with NestJS and TypeScript, backed by PostgreSQL,
+containerized with Docker, and built and deployed automatically on AWS
+(Terraform, GitHub Actions).
 
-Projet d'apprentissage DevOps : du commit à la production.
+A DevOps learning project: from commit to production.
 
-## Statut
+## Status
 
-En cours de construction.
+Work in progress.
