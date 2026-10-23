@@ -1,37 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { DatabaseService } from '../database/database.service';
 import { CreateNoteDto } from './dto/create-note.dto';
-import type { Note } from './note.interface';
+import { Note } from './note.interface';
 
 @Injectable()
 export class NotesService {
-  private readonly notes = new Map<string, Note>();
+  constructor(private readonly database: DatabaseService) {}
 
-  create(dto: CreateNoteDto): Note {
-    const note: Note = {
-      id: randomUUID(),
-      title: dto.title,
-      content: dto.content,
-      createdAt: new Date(),
-    };
-    this.notes.set(note.id, note);
-    return note;
+  async create(dto: CreateNoteDto): Promise<Note> {
+    const rows = await this.database.query<Note>(
+      `INSERT INTO notes (title, content)
+       VALUES ($1, $2)
+       RETURNING id, title, content, created_at AS "createdAt"`,
+      [dto.title, dto.content],
+    );
+    return rows[0];
   }
 
-  findAll(): Note[] {
-    return [...this.notes.values()];
+  async findAll(): Promise<Note[]> {
+    return this.database.query<Note>(
+      `SELECT id, title, content, created_at AS "createdAt"
+       FROM notes
+       ORDER BY created_at DESC`,
+    );
   }
 
-  findOne(id: string): Note {
-    const note = this.notes.get(id);
-    if (!note) {
+  async findOne(id: string): Promise<Note> {
+    const rows = await this.database.query<Note>(
+      `SELECT id, title, content, created_at AS "createdAt"
+       FROM notes
+       WHERE id = $1`,
+      [id],
+    );
+    if (rows.length === 0) {
       throw new NotFoundException(`Note ${id} not found`);
     }
-    return note;
+    return rows[0];
   }
 
-  remove(id: string): void {
-    if (!this.notes.delete(id)) {
+  async remove(id: string): Promise<void> {
+    const rows = await this.database.query<{ id: string }>(
+      'DELETE FROM notes WHERE id = $1 RETURNING id',
+      [id],
+    );
+    if (rows.length === 0) {
       throw new NotFoundException(`Note ${id} not found`);
     }
   }

@@ -1,48 +1,58 @@
 import { NotFoundException } from '@nestjs/common';
+import type { DatabaseService } from '../database/database.service';
+import type { Note } from './note.interface';
 import { NotesService } from './notes.service';
 
+const note: Note = {
+  id: '3f2b8c1e-5d4a-4b7e-9c1a-2e6f8a0b4d12',
+  title: 'Title',
+  content: 'Content',
+  createdAt: new Date('2026-01-01T10:00:00Z'),
+};
+
+function serviceReturning(rows: unknown[]): NotesService {
+  const database = {
+    query: () => Promise.resolve(rows),
+  } as unknown as DatabaseService;
+  return new NotesService(database);
+}
+
 describe('NotesService', () => {
-  let service: NotesService;
+  it('returns the note created in the database', async () => {
+    const service = serviceReturning([note]);
 
-  beforeEach(() => {
-    service = new NotesService();
+    await expect(
+      service.create({ title: 'Title', content: 'Content' }),
+    ).resolves.toEqual(note);
   });
 
-  it('creates a note with an id and a creation date', () => {
-    const note = service.create({ title: 'Title', content: 'Content' });
+  it('lists the notes', async () => {
+    const service = serviceReturning([note, note]);
 
-    expect(note.id).toBeDefined();
-    expect(note.title).toBe('Title');
-    expect(note.content).toBe('Content');
-    expect(note.createdAt).toBeInstanceOf(Date);
+    await expect(service.findAll()).resolves.toHaveLength(2);
   });
 
-  it('lists the created notes', () => {
-    service.create({ title: 'First', content: 'a' });
-    service.create({ title: 'Second', content: 'b' });
+  it('finds a note by id', async () => {
+    const service = serviceReturning([note]);
 
-    expect(service.findAll()).toHaveLength(2);
+    await expect(service.findOne(note.id)).resolves.toEqual(note);
   });
 
-  it('finds a note by id', () => {
-    const created = service.create({ title: 'Title', content: 'Content' });
+  it('throws NotFoundException when the note does not exist', async () => {
+    const service = serviceReturning([]);
 
-    expect(service.findOne(created.id)).toEqual(created);
+    await expect(service.findOne(note.id)).rejects.toThrow(NotFoundException);
   });
 
-  it('throws NotFoundException for an unknown id', () => {
-    expect(() => service.findOne('unknown')).toThrow(NotFoundException);
+  it('removes an existing note', async () => {
+    const service = serviceReturning([{ id: note.id }]);
+
+    await expect(service.remove(note.id)).resolves.toBeUndefined();
   });
 
-  it('removes a note', () => {
-    const created = service.create({ title: 'Title', content: 'Content' });
+  it('throws NotFoundException when removing an unknown note', async () => {
+    const service = serviceReturning([]);
 
-    service.remove(created.id);
-
-    expect(service.findAll()).toHaveLength(0);
-  });
-
-  it('throws NotFoundException when removing an unknown note', () => {
-    expect(() => service.remove('unknown')).toThrow(NotFoundException);
+    await expect(service.remove(note.id)).rejects.toThrow(NotFoundException);
   });
 });
