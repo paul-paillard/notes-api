@@ -24,6 +24,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   constructor(config: ConfigService) {
     this.pool = new Pool({
       connectionString: config.getOrThrow<string>('DATABASE_URL'),
+      connectionTimeoutMillis: 3000,
     });
     this.pool.on('error', (error) => {
       this.logger.error(`Unexpected database error: ${error.message}`);
