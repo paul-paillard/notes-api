@@ -29,7 +29,7 @@ describe('NotesService', () => {
   it('lists the notes', async () => {
     const service = serviceReturning([note, note]);
 
-    await expect(service.findAll()).resolves.toHaveLength(2);
+    await expect(service.findAll()).resolves.toHaveLength(3);
   });
 
   it('finds a note by id', async () => {
