@@ -77,3 +77,36 @@ jobs:
 
       - name: End-to-end tests
         run: npm run test:e2e
+
+  docker:
+    name: Docker image and smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_USER: notes
+      POSTGRES_PASSWORD: ci-only-password
+      POSTGRES_DB: notes
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v6
+
+      - name: Build the image and start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 120
+
+      - name: Smoke test the API
+        run: |
+          curl --fail --silent --show-error http://localhost:3000/health/ready
+          echo
+          curl --fail --silent --show-error -X POST http://localhost:3000/notes \
+            -H "Content-Type: application/json" \
+            -d '{"title":"CI smoke test","content":"Hello"}'
+          echo
+          curl --fail --silent --show-error http://localhost:3000/notes
+          echo
+
+      - name: Check that the API container does not run as root
+        run: test "$(docker compose exec -T api id -u)" != "0"
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
