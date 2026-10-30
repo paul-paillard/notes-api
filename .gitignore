@@ -149,3 +149,10 @@ vite.config.ts.timestamp-*
 .turbo
 
 .env.docker
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
