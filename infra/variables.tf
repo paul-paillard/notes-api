@@ -27,3 +27,21 @@ variable "api_allowed_cidrs" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
+variable "db_name" {
+  type        = string
+  description = "Name of the initial database."
+  default     = "notes"
+}
+
+variable "db_username" {
+  type        = string
+  description = "Master username of the database."
+  default     = "notes"
+}
+
+variable "db_instance_class" {
+  type        = string
+  description = "RDS instance class."
+  default     = "db.t4g.micro"
+}
