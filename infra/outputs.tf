@@ -22,3 +22,18 @@ output "db_security_group_id" {
   description = "ID of the database security group."
   value       = aws_security_group.db.id
 }
+
+output "db_address" {
+  description = "Hostname of the database."
+  value       = aws_db_instance.main.address
+}
+
+output "db_port" {
+  description = "Port of the database."
+  value       = aws_db_instance.main.port
+}
+
+output "db_secret_arn" {
+  description = "ARN of the Secrets Manager secret holding the database credentials."
+  value       = aws_db_instance.main.master_user_secret[0].secret_arn
+}
