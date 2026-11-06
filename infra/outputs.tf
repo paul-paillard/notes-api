@@ -37,3 +37,8 @@ output "db_secret_arn" {
   description = "ARN of the Secrets Manager secret holding the database credentials."
   value       = aws_db_instance.main.master_user_secret[0].secret_arn
 }
+
+output "ecr_repository_url" {
+  description = "URL of the ECR repository."
+  value       = aws_ecr_repository.api.repository_url
+}
