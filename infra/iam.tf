@@ -18,3 +18,16 @@ resource "aws_iam_role_policy_attachment" "task_execution" {
   role       = aws_iam_role.task_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+
+data "aws_iam_policy_document" "read_db_secret" {
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [aws_db_instance.main.master_user_secret[0].secret_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "read_db_secret" {
+  name   = "read-db-secret"
+  role   = aws_iam_role.task_execution.id
+  policy = data.aws_iam_policy_document.read_db_secret.json
+}
