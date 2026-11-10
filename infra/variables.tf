@@ -45,3 +45,9 @@ variable "db_instance_class" {
   description = "RDS instance class."
   default     = "db.t4g.micro"
 }
+
+variable "image_tag" {
+  type        = string
+  description = "Tag of the API image to run."
+  default     = "initial"
+}
